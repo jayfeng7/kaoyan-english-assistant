@@ -16,7 +16,8 @@ data/evaluation
 data/essay-bank/drafts
 data/essay-bank/reviews
 tests
-scripts
+scripts/*
+!scripts/node-tool.mjs
 *.log
 *.tsbuildinfo
 .env
