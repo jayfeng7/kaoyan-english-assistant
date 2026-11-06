@@ -52,6 +52,9 @@ jobs:
           if ($manifest.fileCount -lt 50) { throw "Release package is unexpectedly small." }
           $forbidden = $manifest.files | Where-Object { $_.path -match '^(\.env(?!\.example$)|data/.+\.json$|public/essay-materials/.+\.jpg$|artifacts/)' }
           if ($forbidden) { throw "Forbidden files in release package: $($forbidden.path -join ', ')" }
+          $privateHandbooks = '(^personal-knowledge/|(^|/)(RAG_INTERVIEW|INTERVIEW_HANDBOOK)\.md$)'
+          $trackedHandbooks = git ls-files | Where-Object { $_ -match $privateHandbooks }
+          if ($trackedHandbooks) { throw "Private handbooks tracked in the public repository: $($trackedHandbooks -join ', ')" }
           Write-Host "Release files: $($manifest.fileCount)"
 
   docker:

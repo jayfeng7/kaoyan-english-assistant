@@ -14,6 +14,8 @@ artifacts/** export-ignore
 .env.example text eol=lf -export-ignore
 
 # Local development and operations records.
+personal-knowledge export-ignore
+INTERVIEW_HANDBOOK.md export-ignore
 DEVELOPMENT.md export-ignore
 PHASE65_ACCEPTANCE.md export-ignore
 LAUNCH_CHECKLIST.md export-ignore
