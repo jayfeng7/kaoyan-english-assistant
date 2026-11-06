@@ -17,8 +17,8 @@ describe('essay knowledge retrieval', () => {
     ['从 20% 到 25% 是 5 个百分点吗？', 'Describe the chart.', 'big', 'chart.units.v1'],
     ['He go to school 为什么有问题？', 'Write about your daily routine.', 'big', 'grammar.subject-verb.v1'],
     ['建议信里怎么提出具体行动？', 'Write a letter to give some advice.', 'small', 'advice.specific.v1'],
-  ])('ranks a relevant card first for %s', (question, prompt, composition, id) => {
-    expect(retrieveEssayCards(essayQuestion(question, prompt, composition))[0]?.id).toBe(id);
+  ])('ranks a relevant card first for %s', async (question, prompt, composition, id) => {
+    expect((await retrieveEssayCards(essayQuestion(question, prompt, composition)))[0]?.id).toBe(id);
   });
 
   it.each([
@@ -26,21 +26,21 @@ describe('essay knowledge retrieval', () => {
     ['邀请信怎么请求回复？', 'Write a notice.', 'small'],
     ['图表的百分点怎么算？', 'Describe the chart.', 'small'],
     ['为什么是这个分数？', 'Write an invitation.', 'small'],
-  ])('skips retrieval for %s when no card applies', (question, prompt, composition) => {
-    expect(retrieveEssayCards(essayQuestion(question, prompt, composition))).toEqual([]);
+  ])('skips retrieval for %s when no card applies', async (question, prompt, composition) => {
+    expect(await retrieveEssayCards(essayQuestion(question, prompt, composition))).toEqual([]);
   });
 
-  it('uses the previous user question for a short request for another example', () => {
+  it('uses the previous user question for a short request for another example', async () => {
     const input = essayQuestion('He go 为什么错？', 'Write a short letter.');
     input.messages.push({ role: 'assistant', content: '先判断时态。' }, { role: 'user', content: '再举一个例子。' });
-    expect(retrieveEssayCards(input)[0]?.id).toBe('grammar.subject-verb.v1');
+    expect((await retrieveEssayCards(input))[0]?.id).toBe('grammar.subject-verb.v1');
   });
 
-  it('skips generic chat, legacy unstructured context and disabled retrieval', () => {
+  it('skips generic chat, legacy unstructured context and disabled retrieval', async () => {
     const input = essayQuestion('He go 为什么错？', 'Write a short letter.');
-    expect(retrieveEssayCards({ messages: input.messages })).toEqual([]);
-    expect(retrieveEssayCards({ ...input, followUp: { kind: 'essay', summary: '旧版摘要' } })).toEqual([]);
+    expect(await retrieveEssayCards({ messages: input.messages })).toEqual([]);
+    expect(await retrieveEssayCards({ ...input, followUp: { kind: 'essay', summary: '旧版摘要' } })).toEqual([]);
     vi.stubEnv('ESSAY_RAG_ENABLED', '0');
-    expect(retrieveEssayCards(input)).toEqual([]);
+    expect(await retrieveEssayCards(input)).toEqual([]);
   });
 });

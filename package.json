@@ -1,6 +1,6 @@
 {
   "name": "kaoyan-english-assistant",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "AI-assisted study workspace for the Chinese postgraduate entrance English exam.",
   "license": "MIT",
@@ -18,6 +18,9 @@
     "test:watch": "node scripts/node-tool.mjs vitest",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "data:check": "node scripts/check-local-data.mjs",
+    "rag:index": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-index.eval.ts",
+    "rag:eval": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-retrieval.eval.ts",
+    "rag:eval:answer": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-generation.eval.ts",
     "verify:readonly": "node scripts/verify-deploy.mjs http://127.0.0.1:3000 --readonly",
     "release:source": "node scripts/build-open-source-release.mjs"
   },

@@ -34,7 +34,7 @@ const ROOT_FILES = [
 const DIRECTORIES = ['app', 'assets', 'components', 'lib', 'types', 'tests', 'deploy', 'learning/rag', '.github'];
 const PUBLIC_DOCS = [
   'ARCHITECTURE.md', 'DATA.md', 'DEPLOYMENT.md', 'EVALUATION_PLAN.md',
-  'RAG_ROADMAP.md', 'RELEASING.md', 'STATUS.md', 'USAGE.md',
+  'RAG_EXPERIMENTS.md', 'RAG_INTERVIEW.md', 'RAG_ROADMAP.md', 'RELEASING.md', 'STATUS.md', 'USAGE.md',
 ];
 const PUBLIC_SCRIPTS = [
   'build-open-source-release.mjs', 'check-local-data.mjs', 'node-tool.mjs',

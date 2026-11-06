@@ -2,7 +2,7 @@
 
 面向考研英语一 / 英语二的移动优先学习工具：作文批改、长难句分析、真题解析、流式答疑，以及只在浏览器本地保存的历史记录。
 
-![status](https://img.shields.io/badge/status-v0.1.0%20%C2%B7%20Phase%206.5-orange)
+![status](https://img.shields.io/badge/status-v0.2.0%20%C2%B7%20RAG-orange)
 ![license](https://img.shields.io/badge/code%20license-MIT-blue)
 ![node](https://img.shields.io/badge/node-%3E%3D22.12-339933)
 ![next](https://img.shields.io/badge/Next.js-16.4.2-black)
@@ -14,7 +14,7 @@
 | 模块 | 能力 |
 |---|---|
 | 作文批改 | 英一 20 分 / 英二 15 分 / 小作文 10 分；先给评分与关键批注，完成即可追问；改进版、范文和表达展开后生成 |
-| 作文追问 RAG | 用 BM25 检索适合当前体裁的原创教学卡片，辅助语法解释与表达推荐；回答中的编号可展开核对来源 |
+| 作文追问 RAG | 支持 BM25、向量及混合检索，短追问可结合上一条相关提问补足指代，回答中的编号可展开核对教学卡片 |
 | 图片 / PDF | 图片 OCR 与扫描 PDF 逐页识别；识别文字可校对；文字 PDF 服务端提取；单文件限制 10MB 图片或 20MB、最多 5 页 PDF |
 | 长难句 | 断句、主干、从句、修饰、翻译、语法点、仿写七项结果 |
 | 真题解析 | 内置题库（需自行导入）、粘贴文章、PDF 上传；段落精读、定位、干扰项和按需全文翻译 |
@@ -41,13 +41,15 @@ flowchart LR
   N --> O[百度手写 OCR]
   N --> P[PDF / Sharp]
   N --> D[可选只读题库<br/>本地 JSON]
-  N --> R[作文追问 BM25<br/>原创教学卡片]
+  N --> R[作文追问检索<br/>BM25 / 向量 / 混合]
   K[服务端环境变量<br/>密钥不下发] --> N
 ```
 
 详细设计见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)。
 
-在「作文批改 → 继续提问」里，可以追问「He go to school 为什么有语法问题？」或「邀请信结尾怎么礼貌地请对方回复？」。回答采用卡片时会显示可展开的参考来源。首批卡片涵盖常见语法、应用文和图表图画作文，检索在服务端本地运行。原创卡片用于练习辅导，目前未经过独立教师审核。详见 [RAG 路线与评测](docs/RAG_ROADMAP.md)。
+在「作文批改 → 继续提问」里，可以追问「He go to school 为什么有语法问题？」或「邀请信结尾怎么礼貌地请对方回复？」。回答采用卡片时会显示可展开的参考来源。首批卡片涵盖常见语法、应用文和图表图画作文，用于练习辅导，目前未经过独立教师审核。配置本地向量检索、复跑对比实验和查看结果，见 [RAG 实验与运行说明](docs/RAG_EXPERIMENTS.md)。
+
+工程取舍、失败案例和面试问答整理在 [RAG 工程与面试手册](docs/RAG_INTERVIEW.md)。
 
 ## 快速开始
 
@@ -113,6 +115,8 @@ docker compose up -d --build
 | `OPENROUTER_BASE_URL` / `OPENROUTER_MODEL` | 否 | OpenRouter 兼容接口配置 |
 | `LLM_MAX_TOKENS` | 否 | 默认 8000；结构化输出需要足够预算 |
 | `ESSAY_RAG_ENABLED` | 否 | 默认启用作文追问检索；设为 `0` 可恢复普通追问 |
+| `ESSAY_RAG_MODE` | 否 | `keyword`（默认）、`vector` 或 `hybrid`；后两种需本地 Ollama 和已构建的向量索引 |
+| `ESSAY_RAG_REWRITE` | 否 | 默认改写可识别的短追问；设为 `0` 直接检索原查询 |
 | `BAIDU_OCR_API_KEY` / `BAIDU_OCR_SECRET_KEY` | 否 | 图片与扫描 PDF OCR |
 | `RATE_LIMIT_*` | 否 | 内存级 IP 限流参数；`RATE_LIMIT_LLM_DAILY_MAX` / `RATE_LIMIT_OCR_DAILY_MAX` 为滚动 24 小时全站总预算（0 = 不限），防止地址泄露后被轮换 IP 耗尽模型额度 |
 

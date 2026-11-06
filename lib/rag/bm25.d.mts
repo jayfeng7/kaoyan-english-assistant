@@ -17,3 +17,11 @@ export function buildIndex<T extends SearchCard>(cards: T[]): {
     k?: number;
   }): { hits: { id: string; score: number }[] };
 };
+
+export function retrievalMetrics(hits: { id: string }[], relevance: Record<string, number>, k?: number): {
+  answerable: boolean;
+  correctEmpty: boolean | null;
+  recall: number | null;
+  reciprocalRank: number | null;
+  ndcg: number | null;
+};

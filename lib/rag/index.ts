@@ -2,8 +2,11 @@ import 'server-only';
 import type { ChatRequest, EssayCitation } from '@/types';
 import { retrieveEssayCards } from './retriever';
 
-export function createEssayGrounding(input: ChatRequest) {
-  const cards = retrieveEssayCards(input);
+export async function createEssayGrounding(input: ChatRequest, signal?: AbortSignal) {
+  return groundingForCards(await retrieveEssayCards(input, signal));
+}
+
+export function groundingForCards(cards: Awaited<ReturnType<typeof retrieveEssayCards>>) {
   if (!cards.length) return undefined;
   const sources = new Map<string, EssayCitation>();
   const evidence = cards.map((card, index) => {

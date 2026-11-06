@@ -11,7 +11,7 @@ artifacts/** export-ignore
 .cloudflared/** export-ignore
 .tools/** export-ignore
 .env* export-ignore
-!.env.example
+.env.example text eol=lf -export-ignore
 
 # Local development and operations records.
 DEVELOPMENT.md export-ignore

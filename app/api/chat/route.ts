@@ -15,7 +15,7 @@ export async function POST(request: Request): Promise<Response> {
     context.wordCount = input.messages.reduce((count, message) => count + countWords(message.content), 0);
     const abort = new AbortController();
     const signal = AbortSignal.any([request.signal, abort.signal]);
-    const grounding = createEssayGrounding(input);
+    const grounding = await createEssayGrounding(input, signal);
     const iterator = streamWithFallback({ ...buildChatPrompt(input, grounding?.instructions), signal }, { onProvider: (provider) => { context.provider = provider; } });
     const encoder = new TextEncoder(); let finished = false; let cancelled = false;
     const finish = (code?: ErrorCode) => { if (!finished) { finished = true; finishRequest(context, code); } };
