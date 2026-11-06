@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 35
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -61,6 +61,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Build image
         run: docker build --pull -t kaoyan-english-assistant:ci .
