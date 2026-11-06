@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Quality (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build
+      - name: Validate clean open-source packaging
+        run: node scripts/build-open-source-release.mjs --output=.test-tmp/open-source-check --force
+      - name: Inspect package contents
+        shell: pwsh
+        run: |
+          $manifest = Get-Content .test-tmp/open-source-check/RELEASE_MANIFEST.json -Raw | ConvertFrom-Json
+          if ($manifest.fileCount -lt 50) { throw "Release package is unexpectedly small." }
+          $forbidden = $manifest.files | Where-Object { $_.path -match '^(\.env(?!\.example$)|data/.+\.json$|public/essay-materials/.+\.jpg$|artifacts/)' }
+          if ($forbidden) { throw "Forbidden files in release package: $($forbidden.path -join ', ')" }
+          Write-Host "Release files: $($manifest.fileCount)"
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build image
+        run: docker build --pull -t kaoyan-english-assistant:ci .

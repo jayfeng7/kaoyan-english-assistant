@@ -1,0 +1,30 @@
+# Ignore environment files and local backups; keep the public template.
+.env*
+!.env.example
+
+node_modules/
+.next/
+out/
+dist/
+coverage/
+artifacts/
+.test-tmp/
+*.tsbuildinfo
+*.log
+.DS_Store
+.workbuddy/
+
+# 真题原始材料与本地隧道工具不入库
+data/raw/
+.tools/
+.cloudflared/
+
+# 第三方真题、题目配图、草稿和评审材料仅限本地使用，不得提交或随代码授权。
+# 已跟踪的历史文件不会被本规则自动移除；公开发布请使用 pnpm release:source。
+data/exams/**/*.json
+data/essay-bank/drafts/
+data/essay-bank/reviews/
+data/essay-bank/english1/*.json
+data/essay-bank/english2/*.json
+public/essay-materials/*
+!public/essay-materials/README.md

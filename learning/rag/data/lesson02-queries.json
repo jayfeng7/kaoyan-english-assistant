@@ -1,0 +1,19 @@
+{
+  "version": "lesson02-queries-v1",
+  "split": "development_demo_only",
+  "labelStatus": "author_created_not_independently_adjudicated",
+  "queries": [
+    { "id":"Q01", "group":"invitation-reply", "query":"邀请信里怎样礼貌地请对方回复是否参加？", "composition":"small", "genre":"invitation", "relevance":{"invitation.reply.v1":2} },
+    { "id":"Q02", "group":"invitation-schedule", "query":"邀请信应该怎样交代活动的时间地点？", "composition":"small", "genre":"invitation", "relevance":{"invitation.schedule.v1":2} },
+    { "id":"Q03", "group":"notice-arrangement", "query":"通知要写清楚活动时间、地点和参加要求，怎么组织？", "composition":"small", "genre":"notice", "relevance":{"notice.arrangement.v1":2} },
+    { "id":"Q04", "group":"request-politeness", "query":"请求老师帮忙，Could you please后面用什么形式？", "composition":"small", "genre":"request", "relevance":{"request.politeness.v1":2,"grammar.modal.v1":1} },
+    { "id":"Q05", "group":"apology-remedy", "query":"道歉信除了说对不起，还应该补充什么补救安排？", "composition":"small", "genre":"apology", "relevance":{"apology.remedy.v1":2} },
+    { "id":"Q06", "group":"chart-units", "query":"从20%到25%是增长了百分之5还是5个百分点？", "composition":"big", "genre":"chart", "relevance":{"chart.units.v1":2} },
+    { "id":"Q07", "group":"chart-comparison", "query":"图表作文怎样表达两组数据的对比？", "composition":"big", "genre":"chart", "relevance":{"chart.comparison.v1":2,"chart.units.v1":1} },
+    { "id":"Q08", "group":"picture-argument", "query":"图画作文描写画面之后，怎样展开观点和论证？", "composition":"big", "genre":"picture", "relevance":{"picture.argument.v1":2} },
+    { "id":"Q09", "group":"subject-verb", "query":"原文He go to school为什么有语法问题？", "composition":"small", "genre":"invitation", "relevance":{"grammar.subject-verb.v1":2} },
+    { "id":"Q10", "group":"modal-form", "query":"will goes是否正确，情态动词后动词怎么写？", "composition":"small", "genre":"invitation", "relevance":{"grammar.modal.v1":2,"grammar.subject-verb.v1":1} },
+    { "id":"Q11", "group":"invitation-reply", "query":"How do I get an RSVP from a pal?", "composition":"small", "genre":"invitation", "relevance":{"invitation.reply.v1":2} },
+    { "id":"Q12", "group":"out-of-domain", "query":"量子纠缠发生退相干的机制是什么？", "composition":"big", "genre":"picture", "relevance":{} }
+  ]
+}

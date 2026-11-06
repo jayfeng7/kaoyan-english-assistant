@@ -1,0 +1,33 @@
+# Preserve the pinned upstream worker bytes on Windows checkouts.
+public/pdf-worker/** text eol=lf
+
+# Never include third-party examination content, local evidence, or secrets in git archive exports.
+data/exams/** export-ignore
+data/essay-bank/** export-ignore
+data/evaluation/** export-ignore
+data/raw/** export-ignore
+public/essay-materials/** export-ignore
+artifacts/** export-ignore
+.cloudflared/** export-ignore
+.tools/** export-ignore
+.env* export-ignore
+!.env.example
+
+# Local development and operations records.
+DEVELOPMENT.md export-ignore
+PHASE65_ACCEPTANCE.md export-ignore
+LAUNCH_CHECKLIST.md export-ignore
+DEPLOYMENT_RUNBOOK.md export-ignore
+TRIAL_GUIDE.md export-ignore
+TUNNEL_TRANSPORT_TEST.md export-ignore
+HANDOFF_UI_2026-10-24.md export-ignore
+ESSAY_BANK_REVIEW.md export-ignore
+ESSAY_BANK_EXTENSION_REVIEW.md export-ignore
+PUBLIC_EVAL_DATASET.md export-ignore
+TEACHER_REVIEW_FORM.md export-ignore
+TEST_MATERIALS_GUIDE.md export-ignore
+BETA_TEST_PLAN.md export-ignore
+FINAL_TEST_DEPLOY.md export-ignore
+UI_PERFORMANCE.md export-ignore
+CODEX_PROMPT.md export-ignore
+

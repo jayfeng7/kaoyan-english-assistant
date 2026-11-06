@@ -1,0 +1,55 @@
+{
+  "name": "kaoyan-english-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-assisted study workspace for the Chinese postgraduate entrance English exam.",
+  "license": "MIT",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/node-tool.mjs next dev --webpack",
+    "build": "node scripts/node-tool.mjs next build --webpack",
+    "start": "node scripts/node-tool.mjs next start",
+    "typecheck": "node scripts/node-tool.mjs next typegen && node scripts/node-tool.mjs tsc --noEmit",
+    "lint": "eslint app components lib types tests --max-warnings 0",
+    "test": "node scripts/node-tool.mjs vitest run",
+    "test:watch": "node scripts/node-tool.mjs vitest",
+    "check": "pnpm typecheck && pnpm lint && pnpm test",
+    "data:check": "node scripts/check-local-data.mjs",
+    "verify:readonly": "node scripts/verify-deploy.mjs http://127.0.0.1:3000 --readonly",
+    "release:source": "node scripts/build-open-source-release.mjs"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.80",
+    "idb": "8.0.4",
+    "lucide-react": "0.577.0",
+    "next": "16.4.2",
+    "openai": "6.49.0",
+    "pdf-parse": "2.4.5",
+    "pdfkit": "0.20.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-markdown": "9.1.0",
+    "rehype-sanitize": "6.0.0",
+    "server-only": "0.0.1",
+    "sharp": "0.35.5",
+    "zod": "3.25.76",
+    "zustand": "5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "@types/pdfkit": "0.17.7",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "autoprefixer": "10.6.1",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.2",
+    "fake-indexeddb": "6.2.5",
+    "postcss": "8.5.30",
+    "tailwindcss": "3.4.19",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  }
+}

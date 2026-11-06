@@ -1,0 +1,59 @@
+name: Bug report
+description: 报告可复现的功能、部署或兼容性问题
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        不要在此提交真实 API Key、隧道 Token、学生作文、教师材料或未打码截图。
+        安全问题请使用 Private vulnerability reporting，不要公开细节。
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: 部署方式
+      options:
+        - 本机 next start
+        - Docker + Caddy
+        - Cloudflare Tunnel
+        - 其他反向代理
+        - 仅开发模式
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      placeholder: v0.1.0 / commit hash
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 环境
+      placeholder: Windows 11 / Node 24.20 / pnpm 11.25 / Chrome 版本
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: 1. 打开... 2. 选择... 3. 看到...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 可附脱敏错误码或日志，不要粘贴正文和密钥。
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: 已做检查
+      placeholder: pnpm lint / typecheck / test / build 结果；是否是干净题库、是否配置 OCR

@@ -1,0 +1,86 @@
+{
+  "version": "lesson02-v1",
+  "source": { "id": "project-original-rag-lesson02", "type": "original_demo", "usage": "local_learning", "reviewStatus": "not_independently_or_teacher_reviewed" },
+  "cards": [
+    {
+      "id": "invitation.reply.v1", "documentId": "invitation.communication", "title": "邀请信中的礼貌回复请求",
+      "composition": "small", "genres": ["invitation"], "kind": "expression",
+      "text": "邀请朋友参加活动时，结尾可以询问对方是否参加并请求回复。需要回复期限时，使用题目或实际情境已经给出的日期，不能编造星期和时间。",
+      "appliesWhen": "邀请信；礼貌地请对方回复是否参加活动。",
+      "doesNotApplyWhen": "强制出席通知；不能把例句当成所有应用文的通用结尾。",
+      "example": "Please let me know whether you can join us."
+    },
+    {
+      "id": "invitation.schedule.v1", "documentId": "invitation.communication", "title": "邀请信中的活动时间与地点",
+      "composition": "small", "genres": ["invitation"], "kind": "rule",
+      "text": "邀请参加活动应交代已知的时间、地点和主要安排，便于收信人判断能否参加。信息来自题目或用户确认，不根据模板自行补足。",
+      "appliesWhen": "邀请信；说明活动的时间地点。",
+      "doesNotApplyWhen": "日期地点尚未提供时，不将占位符当作事实填入原文。",
+      "example": "The activity will take place at [time] in [place]."
+    },
+    {
+      "id": "notice.arrangement.v1", "documentId": "notice.basics", "title": "通知中的活动安排与参加要求",
+      "composition": "small", "genres": ["notice"], "kind": "rule",
+      "text": "面向群体的通知应清楚说明活动时间、地点、对象和参加要求。是否要求出席取决于题意，不能把可选活动改写为必须参加。",
+      "appliesWhen": "通知；说明活动安排和参加要求。",
+      "doesNotApplyWhen": "写给朋友的个人邀请信不能直接套用群体通知语气。",
+      "example": "Participants should arrive at the venue on time."
+    },
+    {
+      "id": "request.politeness.v1", "documentId": "request.basics", "title": "请求信中的礼貌请求",
+      "composition": "small", "genres": ["request"], "kind": "expression",
+      "text": "请求老师或他人帮助时，应说明所需帮助与必要背景。Could you please后接动词原形，语气通常比直接命令更委婉；仍需结合关系和情境。",
+      "appliesWhen": "请求信；礼貌地请求对方帮助。",
+      "doesNotApplyWhen": "不能只堆礼貌套语而不交代具体请求。",
+      "example": "Could you please help me check the schedule?"
+    },
+    {
+      "id": "apology.remedy.v1", "documentId": "apology.basics", "title": "道歉信中的说明与补救安排",
+      "composition": "small", "genres": ["apology"], "kind": "rule",
+      "text": "道歉信除了表达歉意，还应按题意简要说明情况，并提出可行的补救安排。补救要回应造成的不便，不编造未经提供的原因或承诺。",
+      "appliesWhen": "道歉信；说明补救措施。",
+      "doesNotApplyWhen": "不能以冗长借口代替道歉，也不能保证未确认的结果。",
+      "example": "I am sorry for the inconvenience. May we arrange another meeting?"
+    },
+    {
+      "id": "chart.units.v1", "documentId": "chart.description", "title": "百分比变化与百分点的区别",
+      "composition": "big", "genres": ["chart"], "kind": "rule",
+      "text": "占比从20%上升到25%，差值是5个百分点；相对原占比的增幅是25%。描述数据前检查分母、单位和比较对象，不把百分点直接写成相对增长百分比。",
+      "appliesWhen": "图表作文；比较占比变化和数据单位。",
+      "doesNotApplyWhen": "图中没有给出的数字不能从例句借用。",
+      "example": "The share rose from 20% to 25%, an increase of five percentage points."
+    },
+    {
+      "id": "chart.comparison.v1", "documentId": "chart.description", "title": "图表中两组数据的对比",
+      "composition": "big", "genres": ["chart"], "kind": "expression",
+      "text": "描述图表时可以用whereas连接两组可比较的数据。先确认对象、时间和单位一致，比较句表达真实差异，不把相关性写成因果关系。",
+      "appliesWhen": "图表作文；表达两组数据的比较和对比。",
+      "doesNotApplyWhen": "缺少数据或两个数值不可比时，不硬套比较句。",
+      "example": "[Group A] accounted for [x]%, whereas [Group B] represented [y]%."
+    },
+    {
+      "id": "picture.argument.v1", "documentId": "picture.argument", "title": "图画描述之后展开观点与论证",
+      "composition": "big", "genres": ["picture"], "kind": "rule",
+      "text": "图画作文可先准确描述画面，再说明与材料相关的观点，并用具体理由或例子论证。观点应受到画面和题目支持，避免与材料无关的万能套话。",
+      "appliesWhen": "图画作文；从画面描写过渡到观点和论证。",
+      "doesNotApplyWhen": "不把图表数据描述方法直接当作图画的事实依据。",
+      "example": "The picture draws attention to [a theme supported by the material]."
+    },
+    {
+      "id": "grammar.subject-verb.v1", "documentId": "grammar.verb-forms", "title": "一般现在时的第三人称单数与主谓一致",
+      "composition": "any", "genres": ["any"], "kind": "rule",
+      "text": "在一般现在时的肯定句中，主语He为第三人称单数，动词go通常写作goes。因此He go to school应检查主谓一致。先确认时态和句型，不将这条变化规则用于情态动词之后。",
+      "appliesWhen": "一般现在时；第三人称单数主语；解释He go的语法问题。",
+      "doesNotApplyWhen": "不能把goes套入will go等情态动词结构。",
+      "example": "He goes to school."
+    },
+    {
+      "id": "grammar.modal.v1", "documentId": "grammar.verb-forms", "title": "情态动词之后使用动词原形",
+      "composition": "any", "genres": ["any"], "kind": "rule",
+      "text": "can、could、will、may等情态动词之后接动词原形。即使主语是He，也写will go而非will goes；不要在情态动词结构中重复添加第三人称单数词尾。",
+      "appliesWhen": "情态动词结构；解释will goes等形式错误。",
+      "doesNotApplyWhen": "本卡不能替代判断句子是否真正含有情态动词。",
+      "example": "He will go to school."
+    }
+  ]
+}

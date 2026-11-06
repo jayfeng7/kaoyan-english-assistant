@@ -1,0 +1,26 @@
+# 构建上下文裁剪：镜像里不需要本地依赖、构建产物、原始材料和密钥
+node_modules
+.next
+.git
+.github
+.gitignore
+.gitattributes
+artifacts
+dist
+docs
+.test-tmp
+coverage
+.tools
+data/raw
+data/evaluation
+data/essay-bank/drafts
+data/essay-bank/reviews
+tests
+scripts
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+README*
+DEPLOY*

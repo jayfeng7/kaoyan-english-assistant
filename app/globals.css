@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --paper: 248 247 243;
+  --ink: 31 43 53;
+  --muted: 100 112 122;
+  --line: 226 229 229;
+  --accent: 32 65 94;
+  --accent-soft: 234 240 245;
+}
+
+@layer base {
+  html { @apply bg-paper text-ink antialiased; }
+  html:has(.essay-flow) { overflow-anchor: none; }
+  body { @apply min-w-0 font-sans; }
+  h1, h2, h3 { @apply font-serif; }
+  button, input, textarea, select { font: inherit; }
+  button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { @apply outline outline-2 outline-offset-4 outline-accent; }
+  ::selection { @apply bg-accent-soft text-accent; }
+}
+
+@layer components {
+  .field { @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-ink transition placeholder:text-muted/70 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/10 disabled:cursor-not-allowed disabled:bg-paper; }
+  .reading { font-size: var(--reading-size, 16px); overflow-wrap: anywhere; }
+  .markdown { @apply break-words text-base leading-8 text-ink; }
+  .markdown > * + * { margin-top: 1rem; }
+  .markdown h1, .markdown h2, .markdown h3 { @apply font-serif font-semibold; }
+  .markdown h1 { @apply text-2xl; }
+  .markdown h2 { @apply text-xl; }
+  .markdown h3 { @apply text-lg; }
+  .markdown ul { @apply list-disc space-y-1 pl-6; }
+  .markdown ol { @apply list-decimal space-y-1 pl-6; }
+  .markdown a { @apply text-accent underline underline-offset-4; }
+  .markdown blockquote { @apply border-l-2 border-accent/30 pl-4 text-muted; }
+  .markdown pre { @apply overflow-x-auto rounded-xl bg-paper p-4 text-sm; }
+  .markdown code { @apply break-words rounded bg-paper px-1 py-0.5 font-mono text-sm; }
+  .markdown pre code { @apply bg-transparent p-0; }
+  .markdown { overflow-wrap: anywhere; font-size: var(--reading-size, 16px); }
+  .markdown table { display: block; max-width: 100%; overflow-x: auto; }
+  .field { min-width: 0; }
+  .essay-detail { overflow-wrap: anywhere; }
+  .essay-prose { min-width: 0; max-width: 100%; overflow-wrap: anywhere; font-size: 1rem; line-height: 1.85; }
+  .essay-prose p { margin: 0; white-space: normal; }
+  .essay-prose p + p { margin-top: .85em; }
+  textarea.essay-editor { min-height: 15rem; max-height: 65vh; line-height: 1.85; }
+  @supports (field-sizing: content) { textarea.essay-editor { field-sizing: content; } }
+  .essay-detail > summary::-webkit-details-marker { display: none; }
+  .feature-grid { @apply grid items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8; }
+  .conversation-panel { @apply flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card; }
+  .app-main { min-width: 0; }
+  .app-main:has(.chat-page) { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+  .chat-page { display: flex; flex: 1; min-height: 0; padding: 8px 8px calc(69px + env(safe-area-inset-bottom)); }
+  .chat-workspace { display: flex; flex: 1; min-height: 0; min-width: 0; }
+  .conversation-panel[data-workspace] { flex: 1; min-height: 0; border-radius: 16px; }
+  .conversation-thread { @apply flex min-h-0 min-w-0 flex-1 flex-col; }
+  .chat-transcript { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior-y: contain; overflow-anchor: none; scrollbar-gutter: stable; }
+  .conversation-panel[data-compact] .chat-transcript { max-height: min(65dvh, 40rem); min-height: 8rem; flex: none; }
+  .essay-flow .conversation-panel[data-empty] .conversation-thread { display: none; }
+  .essay-flow .conversation-panel article > p:first-child { display: none; }
+  .conversation-feedback { max-height: 28%; }
+  /* The composer occupies its own layout row; it never floats over messages. */
+  .chat-composer { @apply shrink-0 border-t border-line bg-white p-2 sm:p-3; position: static; }
+}
+
+@media (min-width: 1024px) {
+  .app-main { margin-left: 13rem; }
+  .chat-page { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  @page { size: A4; margin: 16mm; }
+  [data-app-chrome], [data-toast-region], [data-print-hidden], dialog { display: none !important; }
+  html, body { background: white; color: black; }
+  main { max-width: none !important; padding: 0 !important; }
+  .app-main { margin: 0 !important; height: auto !important; overflow: visible !important; }
+  main:has([data-essay-report]) > :not([data-essay-report]) { display: none !important; }
+  [data-essay-report] { display: block !important; color: black; font-size: 11pt; line-height: 1.6; }
+  [data-essay-report] > header { margin-bottom: 8mm; border-bottom: 1px solid #bbb; padding-bottom: 4mm; }
+  [data-essay-report] h1 { font-size: 20pt; }
+  [data-essay-report] h2 { font-size: 14pt; break-after: avoid; }
+  [data-essay-report] h3 { break-after: avoid; }
+  [data-essay-report] > section { margin: 0 0 5mm; padding: 0; border: 0; box-shadow: none; }
+  [data-essay-report] p { orphans: 3; widows: 3; overflow-wrap: anywhere; }
+  [data-essay-report] li, [data-essay-report] blockquote { break-inside: avoid; }
+  [data-essay-report] .reading, [data-essay-report] .markdown { font-size: 11pt; }
+  [data-essay-report] .shadow-card { box-shadow: none; }
+  [data-essay-report] .sticky { position: static; }
+}

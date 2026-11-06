@@ -1,0 +1,6 @@
+allowBuilds:
+  unrs-resolver: true
+  sharp: true
+  esbuild: true
+overrides:
+  postcss-selector-parser: 7.1.6
