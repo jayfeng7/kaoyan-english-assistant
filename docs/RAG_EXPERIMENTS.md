@@ -30,11 +30,13 @@ Remove-Item Env:RAG_EVAL_SPLIT
 pnpm rag:eval
 
 pnpm rag:eval:answer
+pnpm rag:replay
 ```
 
 - `pnpm rag:index` 只编码 `lib/rag/cards.json` 的项目原创卡片。索引默认写到 `artifacts/rag-index.json`，包含卡片 ID、语料哈希、模型摘要、编码格式、维数和距离定义。改动卡片或模型后重建索引并重启应用。
 - 开发集校准生成 `artifacts/rag-calibration.json`，保留集生成 `artifacts/rag-retrieval-eval.json`。三种模式和两种改写设置均复用生产检索函数，向量依赖失败时实验报错，避免把回退结果当成向量成绩。
 - `pnpm rag:eval:answer` 使用 `.env.local` 配置的第一个生成模型。五条合成问题分别跑无检索、关键词、向量、混合和直接提供正确证据五组，共 25 次生成，结果写到 `artifacts/rag-generation-eval.json`。报告包括生成文本、候选资料、实际引用和延迟。
+- `pnpm rag:replay` 用合成用例走真实聊天接口处理代码，固定向量和生成响应。覆盖语义改述、跨轮改写、体裁冲突、向量超时回退和无证据响应，同时校验 SSE 引用。结果写入 `artifacts/rag-replay.json`。常规 `pnpm test` 也会运行这些用例，真实模型质量由独立的评测命令检查。
 - 在 `.env.local` 设置 `ESSAY_RAG_MODE=hybrid` 并重启即可启用混合检索。默认是 `keyword`。可用 `ESSAY_RAG_REWRITE=0` 关闭改写，`ESSAY_RAG_ENABLED=0` 关闭检索，`ESSAY_RAG_TRACE=1` 输出延迟、回退状态和卡片 ID。默认 Ollama 访问地址为 `127.0.0.1:11434`，向量服务只接收有界查询和改写所需的上一条用户问题。
 
 14 张卡片的 1024 维索引约 305 KB，可精确遍历并随版本重建。如果语料增长到精确遍历成为延迟瓶颈，可用同一套评测对比向量库的召回与开销。当前模型和编码约定见 [Ollama 模型](https://ollama.com/library/qwen3-embedding:0.6b) 与 [Qwen 模型卡](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)。

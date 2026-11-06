@@ -8,6 +8,8 @@ node_modules
 artifacts
 dist
 docs
+personal-knowledge
+INTERVIEW_HANDBOOK.md
 .test-tmp
 coverage
 .tools

@@ -46,4 +46,4 @@ cos = 0.9 / sqrt(0.82) ≈ 0.9939
 
 第二课已提供：[知识单元、分词与BM25](02-knowledge-and-bm25.md)。包括10张原创演示卡、12条开发查询、可解释的真实词项打分，以及数学/行为测试。运行`node learning/rag/02-bm25.mjs`查看基线，运行`node learning/rag/02-bm25.mjs --no-filter --explain Q11`分析误命中。没有接入真实embedding或生产接口。
 
-个人面试复盘入口：[知识手册](../../personal-knowledge/README.md)。后续课程按知识点、项目例子、失败、证据和自测问题继续沉淀。
+项目的向量、混合检索和评测命令见 [RAG 实验](../../docs/RAG_EXPERIMENTS.md)。
