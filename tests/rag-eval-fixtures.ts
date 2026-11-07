@@ -2,7 +2,7 @@ import { z } from 'zod';
 import data from '../learning/rag/data/retrieval-v2.json';
 import type { ChatRequest } from '@/types';
 
-const dataset = z.array(z.object({
+export const evalCaseSchema = z.object({
   id: z.string(),
   split: z.enum(['dev', 'holdout']),
   group: z.enum(['paraphrase', 'direct', 'followup', 'negative']),
@@ -11,9 +11,9 @@ const dataset = z.array(z.object({
   previous: z.string().optional(),
   question: z.string(),
   relevance: z.record(z.number().int().min(1).max(2)),
-}));
+});
 
-export const cases = dataset.parse(data.cases);
+export const cases = z.array(evalCaseSchema).parse(data.cases);
 export type EvalCase = typeof cases[number];
 
 export function toChatRequest(row: EvalCase): ChatRequest {

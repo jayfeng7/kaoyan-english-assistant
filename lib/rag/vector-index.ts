@@ -7,7 +7,7 @@ import { embed, embeddingFormat, embeddingModel, modelDigest } from './embed';
 import cards from './cards.json';
 
 const dimension = 1024;
-const corpusHash = createHash('sha256').update(JSON.stringify(cards)).digest('hex');
+export const corpusHash = createHash('sha256').update(JSON.stringify(cards)).digest('hex');
 const indexSchema = z.object({
   format: z.literal(embeddingFormat),
   model: z.literal(embeddingModel),

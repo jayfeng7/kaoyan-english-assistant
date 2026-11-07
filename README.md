@@ -115,6 +115,7 @@ docker compose up -d --build
 | `ESSAY_RAG_ENABLED` | 否 | 默认启用作文追问检索；设为 `0` 可恢复普通追问 |
 | `ESSAY_RAG_MODE` | 否 | `keyword`（默认）、`vector` 或 `hybrid`；后两种需本地 Ollama 和已构建的向量索引 |
 | `ESSAY_RAG_REWRITE` | 否 | 默认改写可识别的短追问；设为 `0` 直接检索原查询 |
+| `ESSAY_RAG_VECTOR_BACKEND` | 否 | `json`（默认）、`qdrant-exact` 或 `qdrant-hnsw`；Qdrant 模式需先运行 `pnpm rag:qdrant:sync` |
 | `BAIDU_OCR_API_KEY` / `BAIDU_OCR_SECRET_KEY` | 否 | 图片与扫描 PDF OCR |
 | `RATE_LIMIT_*` | 否 | 内存级 IP 限流参数；`RATE_LIMIT_LLM_DAILY_MAX` / `RATE_LIMIT_OCR_DAILY_MAX` 为滚动 24 小时全站总预算（0 = 不限），防止地址泄露后被轮换 IP 耗尽模型额度 |
 

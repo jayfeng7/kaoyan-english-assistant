@@ -39,9 +39,43 @@ pnpm rag:replay
 - `pnpm rag:replay` 用合成用例走真实聊天接口处理代码，固定向量和生成响应。覆盖语义改述、跨轮改写、体裁冲突、向量超时回退和无证据响应，同时校验 SSE 引用。结果写入 `artifacts/rag-replay.json`。常规 `pnpm test` 也会运行这些用例，真实模型质量由独立的评测命令检查。
 - 在 `.env.local` 设置 `ESSAY_RAG_MODE=hybrid` 并重启即可启用混合检索。默认是 `keyword`。可用 `ESSAY_RAG_REWRITE=0` 关闭改写，`ESSAY_RAG_ENABLED=0` 关闭检索，`ESSAY_RAG_TRACE=1` 输出延迟、回退状态和卡片 ID。默认 Ollama 访问地址为 `127.0.0.1:11434`，向量服务只接收有界查询和改写所需的上一条用户问题。
 
-14 张卡片的 1024 维索引约 305 KB，可精确遍历并随版本重建。如果语料增长到精确遍历成为延迟瓶颈，可用同一套评测对比向量库的召回与开销。当前模型和编码约定见 [Ollama 模型](https://ollama.com/library/qwen3-embedding:0.6b) 与 [Qwen 模型卡](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)。
+14 张卡片的 1024 维索引约 305 KB，可精确遍历并随版本重建。Qdrant 后端复用这批向量，对比数据库精确检索与允许近似搜索的结果。当前模型和编码约定见 [Ollama 模型](https://ollama.com/library/qwen3-embedding:0.6b) 与 [Qwen 模型卡](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)。
+
+## Qdrant 后端
+
+Qdrant 是可选的向量检索后端。同步命令从已校验的 JSON 索引导入点。集合名由语料哈希、模型摘要和编码格式生成。服务端查询用当前模型和语料确定集合，并按体裁与题型限定候选 ID，运行时只需发送查询向量。重复同步会覆盖相同 ID，并校验集合点数。Qdrant 不可用、集合缺失或返回不完整结果时，在线追问回退 BM25，严格评测报错。
+
+```powershell
+docker run -d --name kaoyan-rag-qdrant -p 127.0.0.1:6333:6333 -v kaoyan-rag-qdrant:/qdrant/storage -e QDRANT__TELEMETRY_DISABLED=true qdrant/qdrant:v1.20.0
+pnpm rag:index
+pnpm rag:qdrant:sync
+
+foreach ($backend in @('json', 'qdrant-exact', 'qdrant-hnsw')) {
+  $env:ESSAY_RAG_VECTOR_BACKEND = $backend
+  pnpm rag:eval
+}
+pnpm rag:qdrant:bench
+$env:RAG_BENCH_POINTS = '50000'
+pnpm rag:qdrant:bench
+```
+
+在本地应用使用 Qdrant，可设置 `ESSAY_RAG_MODE=hybrid` 和 `ESSAY_RAG_VECTOR_BACKEND=qdrant-exact`。向量库地址默认是 `http://127.0.0.1:6333`，需要认证时从服务端环境提供 `RAG_QDRANT_API_KEY`。业务集合很小时，`qdrant-hnsw` 请求允许近似搜索，Qdrant 仍可选择全量扫描。规模脚本单独建图，核对全部点已索引后比较 exact 和 HNSW，报告生成后删除临时集合。两个检索层仍可在应用中通过 BM25 与 RRF 组合。见 [Qdrant 查询接口](https://api.qdrant.tech/api-reference/search/query-points)和[索引说明](https://qdrant.tech/documentation/manage-data/indexing/)。
+
+规模实验使用 128 维归一化合成向量、64 条独立查询和 Top 10。文档与查询分别固定随机种子，2 万和 5 万规模复用同一批查询。每条查询轮换执行顺序，比较 exact 与 `ef=16/64/128/256/512`。建图使用 `m=16`、`ef_construct=100`，全量扫描阈值为 10 KiB。导入完成后开启索引并等待 `indexed_vectors_count` 达到数据量，再开始预热与计时。
+
+报告同时保存客户端 HTTP 耗时和 Qdrant 返回的服务端处理耗时。ANN Recall@10 的参考答案是同一查询的精确 Top 10，业务查询的 Recall@2 则以卡片相关性标签为参考。合成向量用于观察搜索参数的行为，真实教学卡片和 Qwen3 向量用于业务相关性对照。
 
 ## 保留集结果
+
+独立复核的样本以 JSON 保存。顶层包含 `version`、与向量索引一致的 `corpusHash` 和 `cases`。用例沿用现有题目格式，另填题目家族 `family`、作者 `author`、复核者 `reviewer`、预期行为 `expected` 和 `requiredClaims`。有证据的用例标为 `grounded`，每条关键断言填写 `text` 及支持它的 `evidenceIds`。无证据的用例标为 `no_evidence`，相关性和断言标签留空。每个集合都需包含两种用例。
+
+```powershell
+$env:RAG_EVAL_DATASET = 'artifacts/rag-reviewed-v1.json'
+$env:RAG_EVAL_DATASET_SHA256 = (Get-FileHash -LiteralPath $env:RAG_EVAL_DATASET).Hash
+pnpm rag:eval
+```
+
+记录并保留首次确认的哈希，后续复跑使用同一个值。运行前会检查语料版本、跨集合的题目家族、作者与复核者，以及预期行为与证据标注的一致性。检索报告写到 `artifacts/rag-reviewed/<sha256>/`，保存数据版本、哈希、用例 ID 和候选证据 ID。关键断言标签留给后续回答质量评测使用。
 
 同一批卡片、同样的作文体裁约束，统一计算 Top 2。阈值 `0.40` 只用 12 条开发查询校准。保留集含 17 条有相关卡片的查询和 5 条应弃答查询，标签为项目自标。Recall、MRR 和 nDCG 在有答案查询上取宏平均，弃答率单独统计。P95 是本机预热后的检索耗时，包含查询向量化和版本检查。
 

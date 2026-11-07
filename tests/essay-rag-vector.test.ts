@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { embed, modelDigest } from '@/lib/rag/embed';
 import { loadVectorIndex } from '@/lib/rag/vector-index';
+import cards from '@/lib/rag/cards.json';
 import { packEssayEvidence, prepareEssayQuery, searchEssayKnowledge } from '@/lib/rag/retriever';
 import type { ChatRequest } from '@/types';
 
-vi.mock('@/lib/rag/embed', () => ({ embed: vi.fn(), modelDigest: vi.fn() }));
-vi.mock('@/lib/rag/vector-index', () => ({ loadVectorIndex: vi.fn() }));
+vi.mock(import('@/lib/rag/embed'), async (original) => ({ ...await original(), embed: vi.fn(), modelDigest: vi.fn() }));
+vi.mock(import('@/lib/rag/vector-index'), async (original) => ({ ...await original(), loadVectorIndex: vi.fn() }));
 
 function question(content: string): ChatRequest {
   return {
@@ -63,6 +64,28 @@ describe('vector and hybrid essay retrieval', () => {
     expect(fallback.cards.map(({ id }) => id)).toEqual(['invitation.reply.v1']);
     expect(embed).not.toHaveBeenCalled();
     await expect(searchEssayKnowledge(input, { mode: 'vector', strict: true })).rejects.toThrow('digest');
+  });
+
+  it('filters Qdrant by eligible point IDs and rejects an out-of-scope response', async () => {
+    const allowedIds = cards.flatMap(({ composition, genres }, i) =>
+      (composition === 'any' || composition === 'small') && (genres.includes('any') || genres.includes('invitation')) ? [i] : []);
+    const reply = cards.findIndex(({ id }) => id === 'invitation.reply.v1');
+    const schedule = cards.findIndex(({ id }) => id === 'invitation.schedule.v1');
+    const notice = cards.findIndex(({ id }) => id === 'notice.arrangement.v1');
+    const points = allowedIds.slice(0, 6).map((id) => ({ id, score: id === reply ? 0.9 : id === schedule ? 0.7 : 0.2 }));
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(Response.json({ time: 0.001, result: { points } }))
+      .mockResolvedValueOnce(Response.json({ time: 0.001, result: { points: [{ id: notice, score: 1 }, ...points.slice(1)] } }));
+    vi.stubGlobal('fetch', fetch);
+    const input = question('邀请信怎么请对方回复？');
+    const result = await searchEssayKnowledge(input, { mode: 'hybrid', backend: 'qdrant-exact' });
+    expect(result.vector.map(({ id }) => id)).toEqual(['invitation.reply.v1', 'invitation.schedule.v1']);
+    const requestBody = JSON.parse(fetch.mock.calls[0]![1].body);
+    expect(requestBody).toMatchObject({ params: { exact: true }, filter: { must: [{ has_id: allowedIds }] } });
+    expect(loadVectorIndex).not.toHaveBeenCalled();
+    const fallback = await searchEssayKnowledge(input, { mode: 'hybrid', backend: 'qdrant-exact' });
+    expect(fallback.fallback).toBe(true);
+    expect(fallback.cards.map(({ id }) => id)).toEqual(['invitation.reply.v1']);
   });
 
   it('uses bounded learner context for a pointer and preserves a new question', () => {

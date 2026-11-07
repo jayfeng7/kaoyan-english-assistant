@@ -19,6 +19,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "data:check": "node scripts/check-local-data.mjs",
     "rag:index": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-index.eval.ts",
+    "rag:qdrant:sync": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-qdrant-sync.eval.ts",
+    "rag:qdrant:bench": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-qdrant-bench.eval.ts",
     "rag:replay": "node scripts/node-tool.mjs vitest run tests/rag-replay.test.ts --reporter=default --reporter=json --outputFile.json=artifacts/rag-replay.json",
     "rag:eval": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-retrieval.eval.ts",
     "rag:eval:answer": "node --env-file-if-exists=.env.local scripts/node-tool.mjs vitest run --config vitest.eval.config.ts tests/rag-generation.eval.ts",

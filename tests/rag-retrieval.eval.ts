@@ -1,11 +1,14 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { join } from 'node:path';
 import { expect, it } from 'vitest';
 import { retrievalMetrics } from '@/lib/rag/bm25.mjs';
+import { embed } from '@/lib/rag/embed';
 import { fuseRankings, searchEssayKnowledge, type RetrievalMode } from '@/lib/rag/retriever';
 import { loadVectorIndex } from '@/lib/rag/vector-index';
 import cards from '@/lib/rag/cards.json';
 import { cases, mean, percentile, toChatRequest, type EvalCase } from './rag-eval-fixtures';
+import { loadReviewedDataset } from './rag-reviewed-dataset';
 
 type Hit = { id: string; score: number };
 type Row = { sample: EvalCase } & Awaited<ReturnType<typeof searchEssayKnowledge>>;
@@ -35,13 +38,33 @@ function summarizeEvidence(rows: Row[], packed: boolean) {
 }
 
 it('compares retrieval variants on the fixed holdout or calibrates on dev', async () => {
-  expect(new Set(cases.map(({ id }) => id)).size).toBe(cases.length);
   const cardIds = new Set(cards.map(({ id }) => id));
-  expect(cases.every((sample) => Object.keys(sample.relevance).every((id) => cardIds.has(id)))).toBe(true);
+  const datasetPath = process.env.RAG_EVAL_DATASET;
+  const pinnedHash = process.env.RAG_EVAL_DATASET_SHA256;
+  if (pinnedHash && !datasetPath) throw new Error('Set RAG_EVAL_DATASET when pinning its SHA-256');
+  const reviewed = datasetPath
+    ? await loadReviewedDataset(datasetPath, pinnedHash, cardIds)
+    : undefined;
+  const dataset = reviewed?.cases ?? cases;
+  expect(new Set(dataset.map(({ id }) => id)).size).toBe(dataset.length);
+  expect(dataset.every((sample) => Object.keys(sample.relevance).every((id) => cardIds.has(id)))).toBe(true);
+  const { model, digest, corpusHash, format } = await loadVectorIndex();
+  if (reviewed && reviewed.corpusHash !== corpusHash) throw new Error('Reviewed dataset was labeled against a different corpus');
+  const configuredBackend = process.env.ESSAY_RAG_VECTOR_BACKEND;
+  const backend = configuredBackend === 'qdrant-exact' || configuredBackend === 'qdrant-hnsw' ? configuredBackend : 'json';
+  const datasetDirectory = reviewed ? join('artifacts', 'rag-reviewed', reviewed.hash) : 'artifacts';
+  const outputDirectory = backend === 'json' ? datasetDirectory : join(datasetDirectory, backend);
   const calibration = process.env.RAG_EVAL_SPLIT === 'dev';
-  const samples = cases.filter(({ split }) => split === (calibration ? 'dev' : 'holdout'));
-  // Warm the model and filesystem once. Report warm request latency below.
-  await searchEssayKnowledge(toChatRequest(cases[0]!), { mode: 'hybrid', strict: true });
+  const samples = dataset.filter(({ split }) => split === (calibration ? 'dev' : 'holdout'));
+  const provenance = {
+    datasetVersion: reviewed?.version ?? 'project-authored-v2',
+    frozenFileHash: reviewed?.hash ?? null,
+    datasetHash: createHash('sha256').update(JSON.stringify(samples)).digest('hex'),
+    model, digest, corpusHash, format, backend,
+    minimumCosineOverride: process.env.ESSAY_RAG_MIN_COSINE ?? null,
+  };
+  // Allow a cold model to load before measuring the production request budget.
+  await embed(['Warm-up query.'], 'query', AbortSignal.timeout(30_000));
   if (calibration) {
     const raw: Row[] = [];
     for (const sample of samples) {
@@ -57,9 +80,11 @@ it('compares retrieval variants on the fixed holdout or calibrates on dev', asyn
         return { threshold, mode, ndcgAt2, correctEmpty, balanced: mean([ndcgAt2, correctEmpty]) };
       }),
     );
-    await mkdir('artifacts', { recursive: true });
-    await writeFile('artifacts/rag-calibration.json', JSON.stringify({ sweep, raw }, null, 2));
-    process.stdout.write('RAG calibration saved to artifacts/rag-calibration.json\n');
+    await mkdir(outputDirectory, { recursive: true });
+    const details = raw.map(({ sample, keyword, vector }) => ({ id: sample.id, expected: sample.relevance, keyword, vector }));
+    const report = join(outputDirectory, 'rag-calibration.json');
+    await writeFile(report, JSON.stringify({ provenance, sweep, details }, null, 2));
+    process.stdout.write(`RAG calibration saved to ${report}\n`);
     return;
   }
 
@@ -95,13 +120,8 @@ it('compares retrieval variants on the fixed holdout or calibrates on dev', asyn
       details: rows.map(({ sample, hits, evidence }) => ({ id: sample.id, group: sample.group, expected: sample.relevance, hits, evidence })),
     });
   }
-  const { model, digest, corpusHash, format } = await loadVectorIndex();
-  const provenance = {
-    datasetHash: createHash('sha256').update(JSON.stringify(samples)).digest('hex'),
-    model, digest, corpusHash, format,
-    minimumCosineOverride: process.env.ESSAY_RAG_MIN_COSINE ?? null,
-  };
-  await mkdir('artifacts', { recursive: true });
-  await writeFile('artifacts/rag-retrieval-eval.json', JSON.stringify({ provenance, variants, keywordAnchorAblation }, null, 2));
-  process.stdout.write('RAG retrieval results saved to artifacts/rag-retrieval-eval.json\n');
+  await mkdir(outputDirectory, { recursive: true });
+  const report = join(outputDirectory, 'rag-retrieval-eval.json');
+  await writeFile(report, JSON.stringify({ provenance, variants, keywordAnchorAblation }, null, 2));
+  process.stdout.write(`RAG retrieval results saved to ${report}\n`);
 });

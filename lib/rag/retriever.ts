@@ -3,6 +3,7 @@ import type { ChatRequest } from '@/types';
 import { buildIndex } from './bm25.mjs';
 import { embed, modelDigest } from './embed';
 import { loadVectorIndex } from './vector-index';
+import { searchEssayQdrant, type DenseBackend } from './qdrant';
 import cards from './cards.json';
 
 type Card = typeof cards[number];
@@ -88,6 +89,7 @@ type RetrievalOptions = {
   rewrite?: boolean;
   requireKeywordAnchor?: boolean;
   minimumCosine?: number;
+  backend?: DenseBackend;
   signal?: AbortSignal;
   strict?: boolean;
 };
@@ -96,6 +98,8 @@ export async function searchEssayKnowledge(input: ChatRequest, options: Retrieva
   const started = performance.now();
   const configured = process.env.ESSAY_RAG_MODE;
   const mode = options.mode ?? (configured === 'vector' || configured === 'hybrid' ? configured : 'keyword');
+  const configuredBackend = process.env.ESSAY_RAG_VECTOR_BACKEND;
+  const backend = options.backend ?? (configuredBackend === 'qdrant-exact' || configuredBackend === 'qdrant-hnsw' ? configuredBackend : 'json');
   const prepared = prepareEssayQuery(input, options.rewrite ?? process.env.ESSAY_RAG_REWRITE !== '0');
   let denseMs = 0;
   let fallback = false;
@@ -120,18 +124,20 @@ export async function searchEssayKnowledge(input: ChatRequest, options: Retrieva
       try {
         const timeout = AbortSignal.timeout(2500);
         const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
-        const vectorIndex = await loadVectorIndex();
-        if (vectorIndex.digest !== await modelDigest(signal)) throw new Error('Embedding model digest does not match the index');
+        const vectorIndex = backend === 'json' ? await loadVectorIndex() : undefined;
+        const digest = await modelDigest(signal);
+        if (vectorIndex && vectorIndex.digest !== digest) throw new Error('Embedding model digest does not match the index');
         const [queryVector] = await embed([query], 'query', signal);
         if (!queryVector) throw new Error('Missing query vector');
         const configuredThreshold = Number(process.env.ESSAY_RAG_MIN_COSINE ?? defaultMinimumCosine);
         const threshold = options.minimumCosine ?? (configuredThreshold > 0 && configuredThreshold <= 1 ? configuredThreshold : defaultMinimumCosine);
-        vector = rankHits(vectorIndex.vectors.flatMap(({ id, vector }) => {
-          const card = byId.get(id);
-          if (!card || !eligible(card)) return [];
-          const score = vector.reduce((sum, value, i) => sum + value * queryVector[i]!, 0);
-          return score >= threshold ? [{ id, score }] : [];
-        }));
+        const allowedIds = new Set(cards.filter(eligible).map(({ id }) => id));
+        const matches = backend === 'json'
+          ? vectorIndex!.vectors.filter(({ id }) => allowedIds.has(id)).map(({ id, vector }) => ({
+            id, score: vector.reduce((sum, value, i) => sum + value * queryVector[i]!, 0),
+          }))
+          : await searchEssayQdrant(digest, queryVector, allowedIds, candidateLimit, backend, signal);
+        vector = rankHits(matches.filter(({ score }) => score >= threshold));
       } catch (error) {
         if (options.strict || options.signal?.aborted) throw error;
         fallback = true;
@@ -144,7 +150,7 @@ export async function searchEssayKnowledge(input: ChatRequest, options: Retrieva
   }
   const evidence = packEssayEvidence(hits, keyword, vector);
   const selected = evidence.map(({ id }) => byId.get(id)!);
-  return { mode, rewritten: prepared?.rewritten ?? false, fallback, keyword, vector, hits, evidence, cards: selected,
+  return { mode, backend, rewritten: prepared?.rewritten ?? false, fallback, keyword, vector, hits, evidence, cards: selected,
     denseMs, durationMs: performance.now() - started };
 }
 
@@ -152,8 +158,8 @@ export async function retrieveEssayCards(input: ChatRequest, signal?: AbortSigna
   if (process.env.ESSAY_RAG_ENABLED === '0') return [];
   const result = await searchEssayKnowledge(input, { signal });
   if (process.env.ESSAY_RAG_TRACE === '1' && input.followUp?.kind === 'essay') {
-    const { mode, rewritten, fallback, denseMs, durationMs } = result;
-    process.stdout.write(JSON.stringify({ component: 'essay-rag', mode, rewritten, fallback, denseMs, durationMs,
+    const { mode, backend, rewritten, fallback, denseMs, durationMs } = result;
+    process.stdout.write(JSON.stringify({ component: 'essay-rag', mode, backend, rewritten, fallback, denseMs, durationMs,
       keywordCount: result.keyword.length, vectorCount: result.vector.length, sourceIds: result.cards.map(({ id }) => id) }) + '\n');
   }
   return result.cards;
