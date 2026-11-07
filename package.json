@@ -28,21 +28,21 @@
     "release:source": "node scripts/build-open-source-release.mjs"
   },
   "dependencies": {
-    "@napi-rs/canvas": "0.1.80",
+    "@napi-rs/canvas": "1.1.0",
     "idb": "8.0.4",
-    "lucide-react": "0.577.0",
-    "next": "16.4.2",
-    "openai": "6.49.0",
+    "lucide-react": "1.66.0",
+    "next": "16.4.4",
+    "openai": "7.47.0",
     "pdf-parse": "2.4.5",
     "pdfkit": "0.20.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-markdown": "9.1.0",
+    "react-markdown": "10.1.0",
     "rehype-sanitize": "6.0.0",
     "server-only": "0.0.1",
     "sharp": "0.35.5",
-    "zod": "3.25.76",
-    "zustand": "5.0.15"
+    "zod": "4.6.7",
+    "zustand": "5.0.16"
   },
   "devDependencies": {
     "@types/node": "24.10.0",
