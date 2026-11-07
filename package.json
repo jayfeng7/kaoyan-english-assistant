@@ -45,17 +45,17 @@
     "zustand": "5.0.15"
   },
   "devDependencies": {
-    "@types/node": "24.10.0",
+    "@types/node": "26.6.6",
     "@types/pdfkit": "0.17.7",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "autoprefixer": "10.6.1",
-    "eslint": "9.39.5",
-    "eslint-config-next": "16.4.2",
-    "fake-indexeddb": "6.2.5",
-    "postcss": "8.5.30",
-    "tailwindcss": "3.4.19",
-    "typescript": "5.9.3",
-    "vitest": "5.0.5"
+    "autoprefixer": "10.6.2",
+    "eslint": "10.14.0",
+    "eslint-config-next": "16.4.5",
+    "fake-indexeddb": "6.2.7",
+    "postcss": "8.5.32",
+    "tailwindcss": "4.3.4",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
   }
 }
